@@ -20,9 +20,11 @@ function Bitmap(filePath) {
 Bitmap.prototype.parse = function(buffer) {
   
   this.type = buffer.toString('utf-8', 0, 2);
-  this.width = buffer.readInt16LE(18);
+  this.width = buffer.toString('hex', 18, 20);
   this.height = buffer.readInt16LE(22);
+  this.bits = buffer.toString('hex', 28, 29);
   this.numberOfColors = buffer.readInt16LE(46);
+  this.colors = buffer.toString('hex', 36, 64);
 };
 
 /**
@@ -48,12 +50,11 @@ const transformGreyscale = (img) => {
 
   //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
 
-  //TODO: alter bmp to make the image greyscale ...
-
+  if(img.type !== 'BM') {return null;}
+  //TODO: alter bmp to make the image greyscale ...;
+  
 };
-const changeColors = (bmp) => {
 
-}
 /**
  * A dictionary of transformations
  * Each property represents a transformation that someone could enter on the command line and then a function that would be called on the bitmap to do this job
@@ -74,14 +75,15 @@ function transformWithCallbacks() {
 
     bitmap.parse(buffer);
 
-    bitmap.transform('greyscale');
+    bitmap.transform(operation);
 
     // Note that this has to be nested!
     // Also, it uses the bitmap's instance properties for the name and thew new buffer
     fs.writeFile(bitmap.newFile, bitmap.buffer, (err, out) => {
-      // if (err) {
-      //   throw err;
-      // }
+      if (err) {
+        throw err;
+      }
+
       console.log(`Bitmap Transformed: ${bitmap.newFile}`);
     });
 
